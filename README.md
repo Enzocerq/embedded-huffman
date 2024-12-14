@@ -57,7 +57,7 @@ O **algoritmo de Huffman** é amplamente utilizado para compressão de dados, ge
    ```
 
 ### Resultado
-Ao executar, o programa exibiraá os **códigos de Huffman** gerados para os símbolos e frequências predefinidos.
+Ao executar, o programa exibirá os **códigos de Huffman** gerados para os símbolos e frequências predefinidos.
 
 ---
 
