@@ -88,7 +88,7 @@ Esta implementação é ideal para compressão de dados em:
 | **Etapa**               | **Melhor Caso**       | **Pior Caso**        |
 |-------------------------|-----------------------|-----------------------|
 | **Construção da Árvore**| \(O(n^2)\)            | \(O(n^2)\)            |
-| **Geração dos Códigos** | \(O(n\log n)\) | \(O(n\log n)\) |
+| **Geração dos Códigos** | \(O(nlog n)\) | \(O(nlog n)\) |
 
 ---
 
