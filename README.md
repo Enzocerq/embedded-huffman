@@ -1,4 +1,4 @@
-# Embedded Huffman Encoding
+# Algoritmo de Huffman Embarcado
 
 Este repositório contém uma implementação do **algoritmo de Huffman** em linguagem **C**, adaptada para **sistemas embarcados**. A implementação foi projetada para operar com **arrays estáticos** e **sem recursão**, tornando-a ideal para dispositivos com recursos limitados, como microcontroladores.
 
