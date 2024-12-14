@@ -85,10 +85,80 @@ Esta implementação é ideal para compressão de dados em:
 
 ## 📊 Complexidade
 
-| **Etapa**               | **Melhor Caso**       | **Pior Caso**        |
-|-------------------------|-----------------------|-----------------------|
-| **Construção da Árvore**| \(O(n^2)\)            | \(O(n^2)\)            |
-| **Geração dos Códigos** | \(O(nlog n)\) | \(O(nlog n)\) |
+A análise de **tempo de complexidade** do **algoritmo de Huffman sem recursão e sem alocação dinâmica de memória** pode ser feita avaliando as etapas principais da sua execução. A ausência de recursão e alocação dinâmica não altera significativamente a complexidade assintótica do algoritmo; essas alterações apenas afetam a eficiência prática (desempenho e uso de memória).
 
 ---
 
+### **Etapas do Algoritmo**
+
+O algoritmo de Huffman pode ser dividido em duas etapas principais:
+
+1. **Construção da Árvore de Huffman:**
+   - O objetivo é encontrar repetidamente os dois nós de menor peso e combiná-los até restar um único nó, a raiz da árvore.
+   - Na versão sem recursão, essa construção é feita iterativamente.
+
+2. **Geração dos Códigos de Huffman:**
+   - Cada folha da árvore gera um código de Huffman ao ser percorrida do nó folha até a raiz.
+
+---
+
+### **Complexidade da Construção da Árvore**
+
+#### Melhor Caso:
+- No melhor caso, as frequências dos símbolos são ordenadas em ordem crescente. Isso permite que os dois menores valores sejam encontrados imediatamente, sem necessidade de varreduras completas do conjunto.
+- Encontrar os dois menores nós, \(n - 1\) vezes, é feito com complexidade \(O(n)\) para cada busca.
+- **Complexidade no Melhor Caso:**  
+  \[
+  O(n \cdot n) = O(n^2)
+  \]
+
+#### Pior Caso:
+- No pior caso, as frequências dos símbolos não estão ordenadas, e cada busca pelos dois menores valores requer uma varredura completa do conjunto restante de nós.
+- Para \(n\) nós iniciais, há \(2n - 1\) nós na árvore final. As buscas \(n - 1\) vezes no pior caso custam \(O(n^2)\).
+- **Complexidade no Pior Caso:**  
+  \[
+  O(n^2)
+  \]
+
+---
+
+### **Complexidade da Geração dos Códigos**
+
+#### Melhor e Pior Caso:
+- A geração dos códigos envolve percorrer cada folha até a raiz. Como a altura da árvore é \(O(\log n)\) no caso balanceado e as folhas estão associadas a \(n\) símbolos:
+  - Cada símbolo é percorrido em \(O(\log n)\).
+  - Para \(n\) símbolos, isso resulta em:
+    \[
+    O(n \cdot \log n)
+    \]
+
+---
+
+### **Complexidade Total**
+
+A construção da árvore domina o tempo de execução, pois tem complexidade maior que a geração dos códigos no caso assintótico.
+
+| **Etapa**               | **Melhor Caso**       | **Pior Caso**        |
+|-------------------------|-----------------------|-----------------------|
+| **Construção da Árvore**| \(O(n^2)\)            | \(O(n^2)\)            |
+| **Geração dos Códigos** | \(O(n \cdot \log n)\) | \(O(n \cdot \log n)\) |
+| **Total**               | \(O(n^2)\)            | \(O(n^2)\)            |
+
+---
+
+### **Justificativa**
+
+1. **Construção da Árvore (etapa dominante):**  
+   - A cada passo, os dois menores nós são combinados, o que exige uma busca linear no conjunto de nós restantes. Isso é repetido \(n - 1\) vezes, resultando em \(O(n^2)\).
+
+2. **Geração dos Códigos:**  
+   - É menos custoso do que a construção da árvore, pois cada símbolo percorre um caminho até a raiz com complexidade proporcional à altura da árvore (\(O(\log n)\)). Para \(n\) símbolos, a soma total dos percursos é \(O(n \cdot \log n)\).
+
+---
+
+### **Conclusão**
+O tempo de complexidade do **algoritmo de Huffman sem recursão e alocação dinâmica** é o mesmo da versão tradicional:
+- Melhor Caso: \(O(n^2)\)
+- Pior Caso: \(O(n^2)\)
+
+Isso ocorre porque o gargalo principal do algoritmo está na construção da árvore, onde os dois menores pesos precisam ser encontrados repetidamente.
