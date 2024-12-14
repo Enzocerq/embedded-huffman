@@ -41,11 +41,11 @@ O **algoritmo de Huffman** é amplamente utilizado para compressão de dados, ge
 
 1. **Clone o repositório:**
    ```bash
-   git clone https://github.com/SEU_USUARIO/Embedded-Huffman-Encoding.git
+   git clone https://github.com/SEU_USUARIO/embedded-huffman.git
    ```
 2. **Entre no diretório do projeto:**
    ```bash
-   cd Embedded-Huffman-Encoding
+   cd embedded-huffman
    ```
 3. **Compile o programa:**
    ```bash
