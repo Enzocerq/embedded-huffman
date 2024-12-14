@@ -109,7 +109,7 @@ O algoritmo de Huffman pode ser dividido em duas etapas principais:
 - Encontrar os dois menores nós, \(n - 1\) vezes, é feito com complexidade \(O(n)\) para cada busca.
 - **Complexidade no Melhor Caso:**  
   \[
-  O(n \cdot n) = O(n^2)
+  O(n*n) = O(n^2)
   \]
 
 #### Pior Caso:
@@ -129,7 +129,7 @@ O algoritmo de Huffman pode ser dividido em duas etapas principais:
   - Cada símbolo é percorrido em \(O(\log n)\).
   - Para \(n\) símbolos, isso resulta em:
     \[
-    O(n \cdot \log n)
+    O(n*log n)
     \]
 
 ---
@@ -141,7 +141,7 @@ A construção da árvore domina o tempo de execução, pois tem complexidade ma
 | **Etapa**               | **Melhor Caso**       | **Pior Caso**        |
 |-------------------------|-----------------------|-----------------------|
 | **Construção da Árvore**| \(O(n^2)\)            | \(O(n^2)\)            |
-| **Geração dos Códigos** | \(O(n \cdot \log n)\) | \(O(n \cdot \log n)\) |
+| **Geração dos Códigos** | \(O(n*log n)\) | \(O(n*log n)\) |
 | **Total**               | \(O(n^2)\)            | \(O(n^2)\)            |
 
 ---
@@ -152,7 +152,7 @@ A construção da árvore domina o tempo de execução, pois tem complexidade ma
    - A cada passo, os dois menores nós são combinados, o que exige uma busca linear no conjunto de nós restantes. Isso é repetido \(n - 1\) vezes, resultando em \(O(n^2)\).
 
 2. **Geração dos Códigos:**  
-   - É menos custoso do que a construção da árvore, pois cada símbolo percorre um caminho até a raiz com complexidade proporcional à altura da árvore (\(O(\log n)\)). Para \(n\) símbolos, a soma total dos percursos é \(O(n \cdot \log n)\).
+   - É menos custoso do que a construção da árvore, pois cada símbolo percorre um caminho até a raiz com complexidade proporcional à altura da árvore (\(O(\log n)\)). Para \(n\) símbolos, a soma total dos percursos é \(O(n*log n)\).
 
 ---
 
