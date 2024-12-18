@@ -52,10 +52,14 @@ void minHeapify(struct MinHeap* minHeap, int idx) {
     int left = 2 * idx + 1;
     int right = 2 * idx + 2;
 
-    if ((unsigned int)left < minHeap->size && minHeap->array[left]->freq < minHeap->array[smallest]->freq)
+    if ((unsigned int)left < minHeap->size && 
+        (minHeap->array[left]->freq < minHeap->array[smallest]->freq || 
+        (minHeap->array[left]->freq == minHeap->array[smallest]->freq && minHeap->array[left]->data < minHeap->array[smallest]->data)))
         smallest = left;
 
-    if ((unsigned int)right < minHeap->size && minHeap->array[right]->freq < minHeap->array[smallest]->freq)
+    if ((unsigned int)right < minHeap->size && 
+        (minHeap->array[right]->freq < minHeap->array[smallest]->freq || 
+        (minHeap->array[right]->freq == minHeap->array[smallest]->freq && minHeap->array[right]->data < minHeap->array[smallest]->data)))
         smallest = right;
 
     if (smallest != idx) {
