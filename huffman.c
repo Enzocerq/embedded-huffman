@@ -238,6 +238,10 @@ void HuffmanCodes(char data[], int size) {
 
 // Programa principal para testar as funções acima
 int main() {
+    /* char arr[8000];
+    for (int i = 0; i < 8000; ++i) {
+        arr[i] = 'a' + (i % 26); // Preenche o array com caracteres de 'a' a 'z'
+    } */
     char arr[] = { 'a', 'b', 'r', 'a', 'c', 'a', 'd', 'a', 'b', 'r', 'a' };
     int size = sizeof(arr) / sizeof(arr[0]);
 
