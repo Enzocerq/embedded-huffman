@@ -149,8 +149,8 @@ struct MinHeapNode* buildHuffmanTree(char data[], int freq[], int size) {
 }
 
 // Função utilitária para calcular a frequência dos caracteres
-void calculateFrequency(char data[], int freq[]) {
-    for (int i = 0; data[i] != '\0'; ++i)
+void calculateFrequency(char data[], int freq[], int size) {
+    for (int i = 0; i < size; ++i)
         freq[(int)data[i]]++;
 }
 
@@ -192,13 +192,13 @@ void printCodes(struct MinHeapNode* root, char codes[][MAX_TREE_HT]) {
 }
 
 // Função utilitária para imprimir os códigos de Huffman e suas frequências
-void printHuffmanCodesAndFrequencies(char data[], char codes[][MAX_TREE_HT], int freq[]) {
+void printHuffmanCodesAndFrequencies(char data[], char codes[][MAX_TREE_HT], int freq[], int size) {
     int printed[MAX_CHAR] = {0};
 
     printf("%-10s %-10s %-10s\n", "char", "code", "frequency");
     printf("--------------------------------\n");
 
-    for (int i = 0; data[i] != '\0'; ++i) {
+    for (int i = 0; i < size; ++i) {
         if (!printed[(int)data[i]]) {
             printf("%-10c %-10s %-10d\n", data[i], codes[(int)data[i]], freq[(int)data[i]]);
             printf("--------------------------------\n");
@@ -208,9 +208,9 @@ void printHuffmanCodesAndFrequencies(char data[], char codes[][MAX_TREE_HT], int
 }
 
 // A função principal que constrói uma árvore de Huffman e imprime os códigos percorrendo a árvore de Huffman construída
-void HuffmanCodes(char data[]) {
+void HuffmanCodes(char data[], int size) {
     int freq[MAX_CHAR] = {0};
-    calculateFrequency(data, freq);
+    calculateFrequency(data, freq, size);
 
     char uniqueData[MAX_CHAR];
     int uniqueFreq[MAX_CHAR];
@@ -229,18 +229,19 @@ void HuffmanCodes(char data[]) {
     char codes[MAX_CHAR][MAX_TREE_HT] = {{0}};
     printCodes(root, codes);
 
-    printHuffmanCodesAndFrequencies(data, codes, freq);
+    printHuffmanCodesAndFrequencies(data, codes, freq, size);
 
-    for (int i = 0; data[i] != '\0'; ++i)
+    for (int i = 0; i < size; ++i)
         printf("%s", codes[(int)data[i]]);
     printf("\n");
 }
 
 // Programa principal para testar as funções acima
 int main() {
-    char arr[] = { 'a', 'b', 'a', 'b', 'c', 'a', 'd', '\0' };
+    char arr[] = { 'a', 'b', 'r', 'a', 'c', 'a', 'd', 'a', 'b', 'r', 'a' };
+    int size = sizeof(arr) / sizeof(arr[0]);
 
-    HuffmanCodes(arr);
+    HuffmanCodes(arr, size);
 
     return 0;
 }
