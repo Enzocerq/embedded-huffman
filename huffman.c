@@ -195,9 +195,13 @@ void printCodes(struct MinHeapNode* root, char codes[][MAX_TREE_HT]) {
 void printHuffmanCodesAndFrequencies(char data[], char codes[][MAX_TREE_HT], int freq[]) {
     int printed[MAX_CHAR] = {0};
 
+    printf("%-10s %-10s %-10s\n", "char", "code", "frequency");
+    printf("--------------------------------\n");
+
     for (int i = 0; data[i] != '\0'; ++i) {
         if (!printed[(int)data[i]]) {
-            printf("Caractere: %c, Codigo: %s, Frequencia: %d\n", data[i], codes[(int)data[i]], freq[(int)data[i]]);
+            printf("%-10c %-10s %-10d\n", data[i], codes[(int)data[i]], freq[(int)data[i]]);
+            printf("--------------------------------\n");
             printed[(int)data[i]] = 1;
         }
     }
