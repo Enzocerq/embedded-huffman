@@ -3,6 +3,7 @@
 
 #define MAX_TREE_HT 100
 #define MAX_CHAR 256
+#define EOF_CHAR '\0'
 
 // Um nó da árvore de Huffman
 struct MinHeapNode {
@@ -225,13 +226,22 @@ void convertToAscii(char* compressed) {
     }
     putchar('\n');
 
-    // Exibe a contagem de caracteres ASCII gerados
-    printf("Number of ASCII characters generated: %d\n", index);
+    // Exibe a contagem de caracteres ASCII gerados, excluindo o EOF
+    printf("Number of ASCII characters generated: %d\n", index - 1);
 }
 
-// Função para imprimir o código em bits
-void printBitString(char* bitString) {
-    printf("Compressed Data:\n%s\n", bitString);
+// Função para imprimir os códigos de Huffman gerados
+void printHuffmanCodes(char codes[][MAX_TREE_HT]) {
+    printf("Huffman Codes:\n");
+    for (int i = 0; i < MAX_CHAR; ++i) {
+        if (codes[i][0] != '\0') {
+            if (i == (int)EOF_CHAR) {
+                printf("EOF: %s\n", codes[i]);
+            } else {
+                printf("%c: %s\n", i, codes[i]);
+            }
+        }
+    }
 }
 
 // Função para gerar os códigos de Huffman e realizar a compressão
@@ -239,8 +249,10 @@ void HuffmanCodes(const char data[], int size) {
     memset(freq, 0, sizeof(freq));
     calculateFrequency(data, freq, size);
 
-    int uniqueSize = 0;
+    // Adiciona EOF ao conjunto de símbolos
+    freq[(int)EOF_CHAR] = 1;
 
+    int uniqueSize = 0;
     for (int i = 0; i < MAX_CHAR; ++i) {
         if (freq[i] > 0) {
             uniqueData[uniqueSize] = (char)i;
@@ -250,24 +262,25 @@ void HuffmanCodes(const char data[], int size) {
     }
 
     struct MinHeapNode* root = buildHuffmanTree(uniqueData, uniqueFreq, uniqueSize);
-
     generateCodes(root, codes);
+
+    // Imprime os códigos de Huffman gerados
+    printHuffmanCodes(codes);
 
     compressInput(data, size, codes, compressed);
 
-    printBitString(compressed);
+    // Adiciona o código do EOF ao final do fluxo comprimido
+    for (int j = 0; codes[(int)EOF_CHAR][j] != '\0'; ++j) {
+        compressed[strlen(compressed)] = codes[(int)EOF_CHAR][j];
+    }
+
     convertToAscii(compressed);
 }
 
 // Programa principal
 int main() {
     static char arr[8000];
-    /*
-    for (int i = 0; i < 8000; ++i) {
-        arr[i] = 'a' + (i % 26); // Preenche o array com caracteres de 'a' a 'z'
-    }  */
-
-    int i;
+    static int i;
 
     // Preenche os 5000 primeiros caracteres com 'a'
     for (i = 0; i < 5000; ++i) {
@@ -287,7 +300,7 @@ int main() {
     // Preenche os próximos 200 caracteres com 'd'
     for (; i < 8000; ++i) {
         arr[i] = 'd';
-    }
+    } 
 
     //static const char arr[] = { 'a', 'b', 'a', 'b', 'c', 'a', 'd' };
     int size = sizeof(arr) / sizeof(arr[0]);
