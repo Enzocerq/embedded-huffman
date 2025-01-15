@@ -1,17 +1,18 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#define MAX_TREE_HT 100
+#define MAX_TREE_HT 8000
 #define MAX_CHAR 256
 
-// Um nó da árvore de Huffman
+// Estrutura para representar um nó na árvore de Huffman
 struct MinHeapNode {
     char data;
     unsigned freq;
     struct MinHeapNode *left, *right;
 };
 
-// Um Min Heap: Coleção de nós de min-heap (ou árvore de Huffman)
+// Estrutura para representar o Min Heap
 struct MinHeap {
     unsigned size;
     unsigned capacity;
@@ -19,22 +20,10 @@ struct MinHeap {
 };
 
 // Array estático para os nós
-static struct MinHeapNode nodes[MAX_CHAR];
-static int nodeIndex = 0;
+struct MinHeapNode nodes[MAX_CHAR];
+int nodeIndex = 0;
 
-// Variáveis globais para minimizar o uso de memória
-static int freq[MAX_CHAR] = {0};
-static char uniqueData[MAX_CHAR];
-static int uniqueFreq[MAX_CHAR];
-static char codes[MAX_CHAR][MAX_TREE_HT] = {{0}};
-static char compressed[MAX_TREE_HT * MAX_CHAR] = {0};
-static struct MinHeapNode* stack[MAX_TREE_HT];
-static int arr[MAX_TREE_HT];
-static int visited[MAX_TREE_HT] = {0};
-static char padded_data[MAX_TREE_HT * MAX_CHAR] = {0};
-static char output[MAX_TREE_HT * MAX_CHAR / 8] = {0};
-
-// Função utilitária para alocar um novo nó de min heap com o caractere e a frequência dados
+// Função para criar um novo nó
 struct MinHeapNode* newNode(char data, unsigned freq) {
     struct MinHeapNode* temp = &nodes[nodeIndex++];
     temp->left = temp->right = NULL;
@@ -43,20 +32,20 @@ struct MinHeapNode* newNode(char data, unsigned freq) {
     return temp;
 }
 
-// Função utilitária para criar um min heap com a capacidade dada
+// Função para criar um Min Heap
 void createMinHeap(struct MinHeap* minHeap, unsigned capacity) {
     minHeap->size = 0;
     minHeap->capacity = capacity;
 }
 
-// Função utilitária para trocar dois nós de min heap
+// Função utilitária para trocar dois nós
 void swapMinHeapNode(struct MinHeapNode** a, struct MinHeapNode** b) {
     struct MinHeapNode* t = *a;
     *a = *b;
     *b = t;
 }
 
-// A função padrão minHeapify.
+// Função para minHeapify
 void minHeapify(struct MinHeap* minHeap, int idx) {
     int smallest = idx;
     int left = 2 * idx + 1;
@@ -74,12 +63,7 @@ void minHeapify(struct MinHeap* minHeap, int idx) {
     }
 }
 
-// Função utilitária para verificar se o tamanho do heap é 1 ou não
-int isSizeOne(struct MinHeap* minHeap) {
-    return (minHeap->size == 1);
-}
-
-// Função padrão para extrair o nó de valor mínimo do heap
+// Função para extrair o nó de menor valor
 struct MinHeapNode* extractMin(struct MinHeap* minHeap) {
     struct MinHeapNode* temp = minHeap->array[0];
     minHeap->array[0] = minHeap->array[minHeap->size - 1];
@@ -88,7 +72,7 @@ struct MinHeapNode* extractMin(struct MinHeap* minHeap) {
     return temp;
 }
 
-// Função utilitária para inserir um novo nó no Min Heap
+// Função para inserir um novo nó no Min Heap
 void insertMinHeap(struct MinHeap* minHeap, struct MinHeapNode* minHeapNode) {
     ++minHeap->size;
     int i = minHeap->size - 1;
@@ -100,19 +84,14 @@ void insertMinHeap(struct MinHeap* minHeap, struct MinHeapNode* minHeapNode) {
     minHeap->array[i] = minHeapNode;
 }
 
-// Função padrão para construir o min heap
+// Função para construir o Min Heap
 void buildMinHeap(struct MinHeap* minHeap) {
     int n = minHeap->size - 1;
     for (int i = (n - 1) / 2; i >= 0; --i)
         minHeapify(minHeap, i);
 }
 
-// Função utilitária para verificar se este nó é uma folha
-int isLeaf(struct MinHeapNode* root) {
-    return !(root->left) && !(root->right);
-}
-
-// Cria um min heap com capacidade igual ao tamanho e insere todos os caracteres de data[] no min heap. Inicialmente, o tamanho do min heap é igual à capacidade
+// Função para criar e construir o Min Heap
 void createAndBuildMinHeap(struct MinHeap* minHeap, char data[], int freq[], int size) {
     createMinHeap(minHeap, size);
 
@@ -123,7 +102,7 @@ void createAndBuildMinHeap(struct MinHeap* minHeap, char data[], int freq[], int
     buildMinHeap(minHeap);
 }
 
-// A função principal que constrói a árvore de Huffman
+// Função para construir a árvore de Huffman
 struct MinHeapNode* buildHuffmanTree(char data[], int freq[], int size) {
     struct MinHeapNode *left, *right, *top;
     struct MinHeap minHeap;
@@ -144,53 +123,26 @@ struct MinHeapNode* buildHuffmanTree(char data[], int freq[], int size) {
     return extractMin(&minHeap);
 }
 
-// Função utilitária para calcular a frequência dos caracteres
-void calculateFrequency(const char data[], int freq[], int size) {
-    for (int i = 0; i < size; ++i)
-        freq[(int)data[i]]++;
-}
-
 // Função para gerar os códigos de Huffman
-void generateCodes(struct MinHeapNode* root, char codes[][MAX_TREE_HT]) {
-    int stackTop = 0;
-    struct MinHeapNode* current = root;
-    int top = 0;
-
-    while (stackTop > 0 || current != NULL) {
-        while (current != NULL) {
-            stack[stackTop++] = current;
-            arr[top++] = 0;
-            current = current->left;
-        }
-
-        current = stack[stackTop - 1];
-
-        if (current->right != NULL && !visited[stackTop - 1]) {
-            visited[stackTop - 1] = 1;
-            current = current->right;
-            arr[top - 1] = 1;
-        } else {
-            stackTop--;
-            top--;
-
-            if (isLeaf(current)) {
-                for (int i = 0; i < top; ++i)
-                    codes[(int)current->data][i] = arr[i] + '0';
-                codes[(int)current->data][top] = '\0';
-            }
-
-            current = NULL;
-        }
+void generateCodes(struct MinHeapNode* root, char* code, int top, char codes[][MAX_TREE_HT]) {
+    if (root->left) {
+        code[top] = '0';
+        generateCodes(root->left, code, top + 1, codes);
+    }
+    if (root->right) {
+        code[top] = '1';
+        generateCodes(root->right, code, top + 1, codes);
+    }
+    if (!root->left && !root->right) {
+        code[top] = '\0';
+        strcpy(codes[(int)root->data], code);
     }
 }
 
 // Função para realizar a compressão
-void compressInput(const char input[], int size, char codes[][MAX_TREE_HT], char* compressed) {
-    int bitIndex = 0;
-    for (int i = 0; i < size; ++i) {
-        for (int j = 0; codes[(int)input[i]][j] != '\0'; ++j) {
-            compressed[bitIndex++] = codes[(int)input[i]][j];
-        }
+void compressInput(char input[], char codes[][MAX_TREE_HT], char* compressed) {
+    for (int i = 0; input[i] != '\0'; ++i) {
+        strcat(compressed, codes[(int)input[i]]);
     }
 }
 
@@ -209,9 +161,11 @@ void convertToAscii(char* compressed) {
     int padded_length = ((length + 7) / 8) * 8;
     int padding = padded_length - length;
 
+    char padded_data[padded_length + 1];
     memset(padded_data, '0', padding);
     strcpy(padded_data + padding, compressed);
 
+    char output[padded_length / 8];
     int index = 0;
 
     for (int i = 0; i < padded_length; i += 8) {
@@ -224,21 +178,16 @@ void convertToAscii(char* compressed) {
         putchar(output[i]);
     }
     putchar('\n');
-
-    // Exibe a contagem de caracteres ASCII gerados
-    printf("Number of ASCII characters generated: %d\n", index);
-}
-
-// Função para imprimir o código em bits
-void printBitString(char* bitString) {
-    printf("Compressed Data:\n%s\n", bitString);
 }
 
 // Função para gerar os códigos de Huffman e realizar a compressão
-void HuffmanCodes(const char data[], int size) {
-    memset(freq, 0, sizeof(freq));
-    calculateFrequency(data, freq, size);
+void HuffmanCodes(char data[], int size) {
+    int freq[MAX_CHAR] = {0};
+    for (int i = 0; i < size; ++i)
+        freq[(int)data[i]]++;
 
+    char uniqueData[MAX_CHAR];
+    int uniqueFreq[MAX_CHAR];
     int uniqueSize = 0;
 
     for (int i = 0; i < MAX_CHAR; ++i) {
@@ -251,45 +200,25 @@ void HuffmanCodes(const char data[], int size) {
 
     struct MinHeapNode* root = buildHuffmanTree(uniqueData, uniqueFreq, uniqueSize);
 
-    generateCodes(root, codes);
+    char codes[MAX_CHAR][MAX_TREE_HT] = {{0}};
+    char code[MAX_TREE_HT];
+    generateCodes(root, code, 0, codes);
 
-    compressInput(data, size, codes, compressed);
+    char compressed[MAX_TREE_HT * MAX_CHAR] = {0};
+    compressInput(data, codes, compressed);
 
-    printBitString(compressed);
+    printf("Compressed Data:\n%s\n", compressed);
     convertToAscii(compressed);
 }
 
 // Programa principal
 int main() {
-    static char arr[8000];
-    /*
+    char arr[8000];
     for (int i = 0; i < 8000; ++i) {
         arr[i] = 'a' + (i % 26); // Preenche o array com caracteres de 'a' a 'z'
-    }  */
+    }  
+    //char arr[] = { 'a', 'b', 'r', 'a', 'c', 'a', 'd', 'a', 'b', 'r', 'a' };
 
-    int i;
-
-    // Preenche os 5000 primeiros caracteres com 'a'
-    for (i = 0; i < 5000; ++i) {
-        arr[i] = 'a';
-    }
-
-    // Preenche os próximos 2000 caracteres com 'b'
-    for (; i < 7000; ++i) {
-        arr[i] = 'b';
-    }
-
-    // Preenche os próximos 800 caracteres com 'c'
-    for (; i < 7800; ++i) {
-        arr[i] = 'c';
-    }
-
-    // Preenche os próximos 200 caracteres com 'd'
-    for (; i < 8000; ++i) {
-        arr[i] = 'd';
-    }
-
-    //static const char arr[] = { 'a', 'b', 'a', 'b', 'c', 'a', 'd' };
     int size = sizeof(arr) / sizeof(arr[0]);
 
     HuffmanCodes(arr, size);
