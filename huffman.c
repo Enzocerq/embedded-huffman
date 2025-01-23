@@ -1,3 +1,73 @@
+/*
+ * Algoritmo de Codificação de Huffman - Implementação em C
+ * Plataforma: STM32F030
+ *
+ * Autores: Enzo Girão de Cerqueira e Vladimir Rodaly Joseph
+ * Data: 22 de Janeiro de 2025
+ *
+ * Descrição:
+ * Esta aplicação implementa o algoritmo de codificação de Huffman para
+ * compressão de dados de texto. Ela calcula frequências de caracteres, constrói
+ * uma árvore de Huffman, gera códigos e comprime os dados de entrada em um formato binário.
+ *
+ * Entradas:
+ * - Um array de caracteres (texto) para compressão.
+ * - Caracteres ASCII para cálculo de frequência.
+ *
+ * Saídas:
+ * - Códigos de Huffman para cada caractere.
+ * - Dados comprimidos em formato binário convertidos para representação ASCII.
+ *
+ * Licença:
+ * Livre para uso e modificação com atribuição ao autor.
+ *
+ * Uso:
+ * Compile o código usando um compilador C direcionado ao STM32F030.
+ * Personalize os dados de entrada e execute o programa para observar a saída.
+ *
+ * Histórico de Modificações:
+ * -------------------------------------------------------------
+ * --  #1.
+ * --  Data: 18 de Dez, 2024
+ * --  Autor: Enzo Girão de Cerqueira
+ * --  Motivo: Adicionado impressão de frequência e reformulação do cálculo de frequência.
+ * -------------------------------------------------------------
+ * --  #2.
+ * --  Data: 18 de Dez, 2024
+ * --  Autor: Enzo Girão de Cerqueira
+ * --  Motivo: Ajustado minHeapify para comparar dados quando frequências são iguais.
+ * -------------------------------------------------------------
+ * --  #3.
+ * --  Data: 18 de Dez, 2024
+ * --  Autor: Enzo Girão de Cerqueira
+ * --  Motivo: Melhorada a função de impressão para exibir códigos e frequências formatados.
+ * -------------------------------------------------------------
+ * --  #4.
+ * --  Data: 18 de Dez, 2024
+ * --  Autor: Enzo Girão de Cerqueira
+ * --  Motivo: Reformuladas funções para aceitar parâmetro de tamanho e removido arquivo de teste.
+ * -------------------------------------------------------------
+ * --  #5.
+ * --  Data: 18 de Dez, 2024
+ * --  Autor: Enzo Girão de Cerqueira
+ * --  Motivo: Comentada inicialização de array de teste na função principal.
+ * -------------------------------------------------------------
+ * --  #6.
+ * --  Data: 15 de Jan, 2025
+ * --  Autor: Enzo Girão de Cerqueira
+ * --  Motivo: Implementado tratamento de caractere EOF e melhorias na impressão de códigos.
+ * -------------------------------------------------------------
+ * --  #7.
+ * --  Data: 20 de Jan, 2025
+ * --  Autor: Enzo Girão de Cerqueira
+ * --  Motivo: Otimizado uso de array estático.
+ * -------------------------------------------------------------
+ * --  #8.
+ * --  Data: 22 de Jan, 2025
+ * --  Autor: Enzo Girão de Cerqueira
+ * --  Motivo: Reduzido MAX_CHAR para 128.
+ * -------------------------------------------------------------
+ */
 #include <stdio.h>
 #include <string.h>
 
@@ -6,25 +76,26 @@
 #define EOF_CHAR '\0'
 #define SIZE 8000
 
-// Um nó da árvore de Huffman
+// Um nó na árvore de Huffman
 struct MinHeapNode {
-  char data;
-  unsigned freq;
-  struct MinHeapNode *left, *right;
+  char data;                  // Caractere armazenado neste nó
+  unsigned freq;             // Frequência do caractere
+  struct MinHeapNode *left;  // Ponteiro para o filho esquerdo
+  struct MinHeapNode *right; // Ponteiro para o filho direito
 };
 
-// Um Min Heap: Coleção de nós de min-heap (ou árvore de Huffman)
+// Um MinHeap para armazenar ponteiros para MinHeapNode
 struct MinHeap {
-  unsigned size;
-  unsigned capacity;
-  struct MinHeapNode *array[MAX_CHAR];
+  unsigned size;             // Número atual de elementos no heap
+  unsigned capacity;         // Capacidade máxima do heap
+  struct MinHeapNode *array[MAX_CHAR]; // Array de ponteiros para MinHeapNode
 };
 
-// Array estático para os nós
+// Array estático para nós (otimização de memória)
 static struct MinHeapNode nodes[MAX_CHAR];
-static int nodeIndex = 0;
+static int nodeIndex = 0; // Rastrea o próximo índice de nó livre
 
-// Variáveis globais para minimizar o uso de memória
+// Variáveis globais para frequências de caracteres e códigos
 static int freq[MAX_CHAR] = {0};
 static char uniqueData[MAX_CHAR];
 static int uniqueFreq[MAX_CHAR];
@@ -36,8 +107,13 @@ static int visited[MAX_TREE_HT] = {0};
 static char padded_data[MAX_TREE_HT * MAX_CHAR] = {0};
 static char output[MAX_TREE_HT * MAX_CHAR / 8] = {0};
 
-// Função utilitária para alocar um novo nó de min heap com o caractere e a
-// frequência dados
+/**
+ * Aloca um novo MinHeapNode.
+ *
+ * @param data Caractere para o nó.
+ * @param freq Frequência do caractere.
+ * @return Ponteiro para o novo nó.
+ */
 struct MinHeapNode *newNode(char data, unsigned freq) {
   struct MinHeapNode *temp = &nodes[nodeIndex++];
   temp->left = temp->right = NULL;
@@ -46,7 +122,12 @@ struct MinHeapNode *newNode(char data, unsigned freq) {
   return temp;
 }
 
-// Função utilitária para criar um min heap com a capacidade dada
+/**
+ * Cria e inicializa um MinHeap.
+ *
+ * @param minHeap Ponteiro para a estrutura MinHeap.
+ * @param capacity Capacidade máxima do heap.
+ */
 void createMinHeap(struct MinHeap *minHeap, unsigned capacity) {
   minHeap->size = 0;
   minHeap->capacity = capacity;
@@ -59,7 +140,12 @@ void swapMinHeapNode(struct MinHeapNode **a, struct MinHeapNode **b) {
   *b = t;
 }
 
-// A função padrão minHeapify.
+/**
+ * Função MinHeapify para manter a propriedade do heap.
+ *
+ * @param minHeap Ponteiro para a estrutura MinHeap.
+ * @param idx Índice do nó atual para aplicar heapify.
+ */
 void minHeapify(struct MinHeap *minHeap, int idx) {
   int smallest = idx;
   int left = 2 * idx + 1;
@@ -79,10 +165,20 @@ void minHeapify(struct MinHeap *minHeap, int idx) {
   }
 }
 
-// Função utilitária para verificar se o tamanho do heap é 1 ou não
+/**
+ * Verifica se o tamanho do MinHeap é um.
+ *
+ * @param minHeap Ponteiro para a estrutura MinHeap.
+ * @return 1 se o tamanho for um, 0 caso contrário.
+ */
 int isSizeOne(struct MinHeap *minHeap) { return (minHeap->size == 1); }
 
-// Função padrão para extrair o nó de valor mínimo do heap
+/**
+ * Extrai o nó com a frequência mínima do heap.
+ *
+ * @param minHeap Ponteiro para a estrutura MinHeap.
+ * @return Ponteiro para o nó extraído.
+ */
 struct MinHeapNode *extractMin(struct MinHeap *minHeap) {
   struct MinHeapNode *temp = minHeap->array[0];
   minHeap->array[0] = minHeap->array[minHeap->size - 1];
@@ -91,7 +187,12 @@ struct MinHeapNode *extractMin(struct MinHeap *minHeap) {
   return temp;
 }
 
-// Função utilitária para inserir um novo nó no Min Heap
+/**
+ * Insere um novo nó no MinHeap.
+ *
+ * @param minHeap Ponteiro para a estrutura MinHeap.
+ * @param minHeapNode Ponteiro para o nó a ser inserido.
+ */
 void insertMinHeap(struct MinHeap *minHeap, struct MinHeapNode *minHeapNode) {
   ++minHeap->size;
   int i = minHeap->size - 1;
@@ -103,19 +204,33 @@ void insertMinHeap(struct MinHeap *minHeap, struct MinHeapNode *minHeapNode) {
   minHeap->array[i] = minHeapNode;
 }
 
-// Função padrão para construir o min heap
+/**
+ * Constrói um MinHeap a partir dos nós dados.
+ *
+ * @param minHeap Ponteiro para a estrutura MinHeap.
+ */
 void buildMinHeap(struct MinHeap *minHeap) {
   int n = minHeap->size - 1;
   for (int i = (n - 1) / 2; i >= 0; --i)
     minHeapify(minHeap, i);
 }
 
-// Função utilitária para verificar se este nó é uma folha
+/**
+ * Verifica se um nó é uma folha.
+ *
+ * @param root Ponteiro para a estrutura MinHeapNode.
+ * @return 1 se for folha, 0 caso contrário.
+ */
 int isLeaf(struct MinHeapNode *root) { return !(root->left) && !(root->right); }
 
-// Cria um min heap com capacidade igual ao tamanho e insere todos os caracteres
-// de data[] no min heap. Inicialmente, o tamanho do min heap é igual à
-// capacidade
+/**
+ * Cria e constrói um MinHeap a partir dos dados fornecidos.
+ *
+ * @param minHeap Ponteiro para a estrutura MinHeap.
+ * @param data Array de caracteres.
+ * @param freq Array de frequências.
+ * @param size Tamanho do array de caracteres.
+ */
 void createAndBuildMinHeap(struct MinHeap *minHeap, char data[], int freq[],
                            int size) {
   createMinHeap(minHeap, size);
@@ -127,7 +242,14 @@ void createAndBuildMinHeap(struct MinHeap *minHeap, char data[], int freq[],
   buildMinHeap(minHeap);
 }
 
-// A função principal que constrói a árvore de Huffman
+/**
+ * Constrói uma Árvore de Huffman a partir dos dados de entrada.
+ *
+ * @param data Array de caracteres únicos.
+ * @param freq Array de frequências dos caracteres.
+ * @param size Número de caracteres únicos.
+ * @return Ponteiro para a raiz da Árvore de Huffman.
+ */
 struct MinHeapNode *buildHuffmanTree(char data[], int freq[], int size) {
   struct MinHeapNode *left, *right, *top;
   struct MinHeap minHeap;
@@ -158,7 +280,12 @@ void calculateFrequencyInChunks(const char data[], int freq[], int size, int chu
     }
 }
 
-// Função para gerar os códigos de Huffman
+/**
+ * Gera os códigos de Huffman para cada caractere.
+ *
+ * @param root Ponteiro para a raiz da árvore de Huffman.
+ * @param codes Matriz para armazenar os códigos gerados.
+ */
 void generateCodes(struct MinHeapNode *root, char codes[][MAX_TREE_HT]) {
   int stackTop = 0;
   struct MinHeapNode *current = root;
@@ -252,14 +379,19 @@ void printHuffmanCodes(char codes[][MAX_TREE_HT]) {
   }
 }
 
-// Função para gerar os códigos de Huffman e realizar a compressão
+/**
+ * Gera os códigos de Huffman e realiza a compressão.
+ *
+ * @param data Dados de entrada (texto).
+ * @param size Tamanho dos dados de entrada.
+ */
 void HuffmanCodes(const char data[], int size) {
   memset(freq, 0, sizeof(freq));
   
   // Chama a função que calcula a frequência em partes (1000 caracteres por vez)
   calculateFrequencyInChunks(data, freq, size, 1000);
 
-  // Adiciona EOF ao conjunto de símbolos
+  // Adiciona o símbolo EOF ao conjunto de caracteres
   freq[(int)EOF_CHAR] = 1;
 
   int uniqueSize = 0;
