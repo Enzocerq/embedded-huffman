@@ -2,7 +2,7 @@
 #include <string.h>
 
 #define MAX_TREE_HT 100
-#define MAX_CHAR 256
+#define MAX_CHAR 128
 #define EOF_CHAR '\0'
 #define SIZE 8000
 
